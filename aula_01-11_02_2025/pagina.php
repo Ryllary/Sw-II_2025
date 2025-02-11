@@ -1,6 +1,4 @@
 <?php
-    $nome
-
-
-
+    echo "Bem vindo Ryll!";
+    
 ?>
