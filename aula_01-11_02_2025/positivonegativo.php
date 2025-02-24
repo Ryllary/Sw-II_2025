@@ -2,7 +2,6 @@
 
     $numero = 20;
 
-
     if ($numero >= 1) {
 
         echo "O número $numero é positivo.";
