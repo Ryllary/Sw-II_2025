@@ -1,12 +1,15 @@
 <?php
+//função sem parametro e com retorno
 
- Function msg(){
+function msg (){
     $a = "Zawe";
     return $a;
+}
 
- }
+//o .= concatena (JUNTA OS ELEMENTOS)
+$frase = "Oiee";
+$frase .= msg();
+$frase .= " bem-vindo";
 
- $frase = "Oieee";
- $frase .= msg();
-
+echo $frase;
 ?>
