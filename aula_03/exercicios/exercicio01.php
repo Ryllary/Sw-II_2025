@@ -1,5 +1,4 @@
 <?php
-//função sem parametro e com retorno
 
 function msg()
 {
