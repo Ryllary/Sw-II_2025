@@ -1,0 +1,17 @@
+[
+    {   
+        "nome": "Notebook",
+        "preco": 2500,
+        "quantidade": 5
+    },
+    {
+        "nome": "Smartphone",
+        "preco": 1500,
+        "quantidade": 8
+    },
+    {
+        "nome": "Tablet",
+        "preco": 800,
+        "quantidade": 12
+    }
+]
