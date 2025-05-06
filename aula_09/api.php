@@ -1,7 +1,8 @@
 <?php
 // cabeçalho
-header("Content-Type: application/json"); // define o tipo da resposta
+header("Content-Type: application/json");
 
+// define o tipo da resposta
 $metodo = $_SERVER['REQUEST_METHOD'];
 
 // recupera o arquivo json na mesma pasta
@@ -12,18 +13,15 @@ if (!file_exists($arquivo)) {
     file_put_contents($arquivo, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
-// CORREÇÃO: carrega os dados do JSON para a variável $usuario
+// carrega os dados do JSON para a variável
 $usuario = json_decode(file_get_contents($arquivo), true);
 
 switch ($metodo) {
-
     case 'GET':
-        // verifica se tem um parâmetro id
         if (isset($_GET['id'])) {
             $id = intval($_GET['id']);
             $usuario_encontrado = null;
 
-            // procura pelo id
             foreach ($usuario as $u) {
                 if ($u['id'] == $id) {
                     $usuario_encontrado = $u;
@@ -38,7 +36,6 @@ switch ($metodo) {
                 echo json_encode(["erro" => "Usuário não encontrado"], JSON_UNESCAPED_UNICODE);
             }
         } else {
-            // retorna todos os usuários
             echo json_encode($usuario, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         }
         break;
@@ -52,7 +49,6 @@ switch ($metodo) {
             exit;
         }
 
-        // gera um id único
         $novo_id = 1;
 
         if (!empty($usuario)) {
@@ -66,22 +62,78 @@ switch ($metodo) {
             "email" => $dados["email"]
         ];
 
-        // adiciona o novo usuário ao array existente
         $usuario[] = $novoUsuario;
 
-        // salva no arquivo
         file_put_contents($arquivo, json_encode($usuario, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-        // retorna a confirmação
         echo json_encode([
             "mensagem" => "Usuário inserido com sucesso",
             "usuario" => $novoUsuario
         ], JSON_UNESCAPED_UNICODE);
+        break;
 
+    case 'PUT':
+        parse_str(file_get_contents("php://input"), $put_vars);
+
+        if (!isset($put_vars['id'])) {
+            http_response_code(400);
+            echo json_encode(["erro" => "ID do usuário é obrigatório para atualização"], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $id = intval($put_vars['id']);
+        $atualizado = false;
+
+        foreach ($usuario as &$u) {
+            if ($u['id'] == $id) {
+                if (isset($put_vars['nome'])) $u['nome'] = $put_vars['nome'];
+                if (isset($put_vars['email'])) $u['email'] = $put_vars['email'];
+                $atualizado = true;
+                break;
+            }
+        }
+
+        if ($atualizado) {
+            file_put_contents($arquivo, json_encode($usuario, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            echo json_encode(["mensagem" => "Usuário atualizado com sucesso"], JSON_UNESCAPED_UNICODE);
+        } else {
+            http_response_code(404);
+            echo json_encode(["erro" => "Usuário não encontrado"], JSON_UNESCAPED_UNICODE);
+        }
+        break;
+
+    case 'DELETE':
+        parse_str(file_get_contents("php://input"), $delete_vars);
+
+        if (!isset($delete_vars['id'])) {
+            http_response_code(400);
+            echo json_encode(["erro" => "ID do usuário é obrigatório para exclusão"], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $id = intval($delete_vars['id']);
+        $encontrado = false;
+
+        foreach ($usuario as $key => $u) {
+            if ($u['id'] == $id) {
+                unset($usuario[$key]);
+                $usuario = array_values($usuario); // reorganiza os índices
+                $encontrado = true;
+                break;
+            }
+        }
+
+        if ($encontrado) {
+            file_put_contents($arquivo, json_encode($usuario, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            echo json_encode(["mensagem" => "Usuário deletado com sucesso"], JSON_UNESCAPED_UNICODE);
+        } else {
+            http_response_code(404);
+            echo json_encode(["erro" => "Usuário não encontrado"], JSON_UNESCAPED_UNICODE);
+        }
         break;
 
     default:
-        http_response_code(405); // método não permitido
+        http_response_code(405);
         echo json_encode(["erro" => "Método não permitido"], JSON_UNESCAPED_UNICODE);
         break;
 }
